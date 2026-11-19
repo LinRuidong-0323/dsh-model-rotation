@@ -515,3 +515,5 @@ cmd /c rmdir "D:\Data\dsh\profiles\desktop\node_modules\@local\dsh-model-rotatio
 | [dsh-echelon](https://github.com/Abnerluo123/dsh-echelon) | MIT | 档位式路由、能力路由（图像/上下文） | 无设置页；配置需手改 |
 
 许可证均允许参考思路，不复制代码即无合规风险。
+
+<!-- proxy-verify: 2026-11-19 22:16:52 -->
