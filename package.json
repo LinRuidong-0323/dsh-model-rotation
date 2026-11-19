@@ -3,6 +3,19 @@
   "version": "0.2.10",
   "private": true,
   "description": "Model rotation chains: an ordered list of provider/model routes behind one picker entry, failing over on retryable errors.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LinRuidong-0323/dsh-model-rotation.git"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "llm",
+    "failover",
+    "model-rotation"
+  ],
   "type": "module",
   "exports": {
     ".": "./index.js",

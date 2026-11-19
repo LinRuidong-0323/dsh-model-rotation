@@ -1,11 +1,32 @@
 # dsh-model-rotation — 模型轮换插件
 
-> **状态：隔离验证通过，未安装到生产 profile。**
-> 158 项单元测试、63 项隔离端到端、14 项真实 agent 流程、8 项多轮续接、17 项设置接口。生产安装留待用户明确授权。
+> **状态：0.2.10，已安装并在生产 profile 中日常使用。**
+> 158 项单元测试、63 项隔离端到端、14 项真实 agent 流程、8 项多轮续接、17 项设置接口。
 
 一个 DeepSeek Harness（DSH）插件，把一组 `provider/model` 路由打包成一条"链"，
 在模型选择器里显示为一个条目。选中后按顺序尝试链上每个路由，遇到可重试的失败
 （限流、超时、5xx、空响应）自动降级到下一个。
+
+## 安装
+
+```powershell
+git clone https://github.com/LinRuidong-0323/dsh-model-rotation.git
+```
+
+然后在 DSH 里通过 **设置 → 插件 → 添加插件** 指向该目录，或把目录建 junction 到
+profile 的 `node_modules/@local/dsh-model-rotation` 并在 `package.json` 的
+`dsh.profile.bundles` 中加入 `@local/dsh-model-rotation`。
+
+**注意**：本插件的包名是 `@local/dsh-model-rotation`（`@local` 前缀表示本地链接）。
+若你从 GitHub 安装，请按自己的 profile 布局调整包名与路径。
+
+## 快速开始
+
+1. 设置 → 插件 → **模型轮换**，新建一条链
+2. 按优先级添加路由（渠道 + 模型）
+3. 可选：给每条路由写备注（如"便宜"、"强推理"）
+4. 保存后，该链会出现在模型选择器里，直接选中即可
+
 
 ---
 
