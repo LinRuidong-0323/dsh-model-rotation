@@ -1,0 +1,15 @@
+# dsh-model-rotation bundle patch.
+#
+# One insert row mounts the Host half. `inject = ['llm']` guarantees it loads
+# after the LLM service exists; it never rewrites another plugin's routes.
+#
+# The `config` block is what makes this plugin a settings entry: the settings
+# mirror enumerates `configEditor.configuration()` and skips any entry without a
+# schema. An empty `config: {}` produces no namespace, so the two knobs are
+# spelled out here with their defaults.
+- insert:
+    - id: model-rotation
+      name: '@local/dsh-model-rotation'
+      config:
+        cooldownSeconds: 15
+        idleTimeoutSeconds: 90

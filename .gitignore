@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Local install artifacts
+*.tmp
+*.log
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local profile wiring (paths are machine-specific)
+package-lock.json
+pnpm-lock.yaml
