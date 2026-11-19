@@ -516,4 +516,3 @@ cmd /c rmdir "D:\Data\dsh\profiles\desktop\node_modules\@local\dsh-model-rotatio
 
 许可证均允许参考思路，不复制代码即无合规风险。
 
-<!-- proxy-verify: 2026-11-19 22:16:52 -->
