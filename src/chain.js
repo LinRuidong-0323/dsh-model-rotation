@@ -28,6 +28,16 @@ export const RETRYABLE_CODES = Object.freeze([
   // never tries the route behind it — which is exactly the case a rotation chain
   // exists to handle.
   'CONTEXT_WINDOW_EXCEEDED',
+  // The host binds a prepared call to one dispatch (`dsh-llm`: "a prepared LLM
+  // call can only be dispatched once") and also rejects a dispatch whose controls
+  // drifted from the resolved config. Either way the failure belongs to the
+  // handle, not to the conversation: the NEXT route is prepared with a fresh
+  // handle and can still answer.
+  //
+  // Leaving it unclassified made it terminal by default, so one route's stale
+  // handle ended the whole walk — 30 of 40 recorded failures were this code, each
+  // one stopping at the first route with the remaining routes never tried.
+  'INVALID_PREPARED_CALL',
 ])
 
 /**

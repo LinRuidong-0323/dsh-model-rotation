@@ -195,8 +195,47 @@ test('a context-window failure moves to the next model in the chain', async () =
   cleanup()
 })
 
-test('buildChain puts the requested route first and drops duplicates', () => {
-  const chain = buildChain(
+test('an invalid prepared call advances the chain instead of ending it', () => {
+  // The host binds a prepared call to one dispatch and rejects a dispatch whose
+  // controls drifted. Both surface as INVALID_PREPARED_CALL, and both belong to
+  // the handle rather than the conversation: the next route is prepared with a
+  // fresh handle and can still answer.
+  //
+  // Leaving this code unclassified made it terminal by default, so one stale
+  // handle ended the whole walk. In the recorded request log this code was 30 of
+  // 40 failures, every one stopping at the first route.
+  assert.equal(shouldFailover('INVALID_PREPARED_CALL'), true)
+  assert.ok(RETRYABLE_CODES.includes('INVALID_PREPARED_CALL'))
+  assert.ok(!TERMINAL_CODES.includes('INVALID_PREPARED_CALL'))
+})
+
+test('a dispatch-time prepared-call failure falls over to the next route', async () => {
+  // End to end: route 1 throws at dispatch (synchronously, before any I/O), and
+  // route 2 must still be tried and answer.
+  const llm = fakeLlm({
+    'p1/a': {
+      stream() {
+        throw Object.assign(new Error('a prepared LLM call can only be dispatched once'), {
+          code: 'INVALID_PREPARED_CALL',
+        })
+      },
+    },
+    'p2/b': { chunks: [{ type: 'text-delta', text: 'from-b' }, { type: 'finish', reason: { kind: 'stop' } }] },
+  })
+  const { adapter, cleanup } = adapterWith(
+    [{ id: 'main', routes: [{ provider: 'p1', model: 'a' }, { provider: 'p2', model: 'b' }] }],
+    llm,
+  )
+  const prepared = await adapter.prepareCall(ROUTER_PROVIDER, 'main')
+  const chunks = []
+  for await (const chunk of prepared.stream({ messages: [] })) chunks.push(chunk)
+
+  assert.equal(chunks[0].text, 'from-b', 'the second route must answer')
+  assert.deepEqual(llm.calls.map(call => call.key), ['p1/a', 'p2/b'], 'both routes must be attempted')
+  cleanup()
+})
+
+test('buildChain puts the requested route first and drops duplicates', () => {  const chain = buildChain(
     { provider: 'p1', model: 'm1' },
     [
       { provider: 'p1', model: 'm1' },

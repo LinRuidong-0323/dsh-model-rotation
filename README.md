@@ -1,7 +1,7 @@
 # dsh-model-rotation — 模型轮换插件
 
 > **状态：0.2.10，已安装并在生产 profile 中日常使用。**
-> 158 项单元测试、63 项隔离端到端、14 项真实 agent 流程、8 项多轮续接、17 项设置接口。
+> 160 项单元测试、63 项隔离端到端、14 项真实 agent 流程、8 项多轮续接、17 项设置接口。
 
 一个 DeepSeek Harness（DSH）插件，把一组 `provider/model` 路由打包成一条"链"，
 在模型选择器里显示为一个条目。选中后按顺序尝试链上每个路由，遇到可重试的失败
@@ -109,7 +109,7 @@ dsh-model-rotation/
     ├── lifecycle.test.js          168 行   9 项：挂载/卸载、重载隔离
     ├── move-bar.test.js           129 行  10 项：undefined
     ├── retry-boundary.test.js     161 行   7 项：与 llm-retry 边界
-    └── rotation.test.js          1225 行  77 项：核心语义
+    └── rotation.test.js          1264 行  79 项：核心语义
 ```
 
 ### 3.2 提交语义（目标第 2 项）
@@ -180,12 +180,12 @@ dsh-model-rotation/
 早期版本在这里填 `['text']`，等于替厂商断言"这个模型瞎"，结果整个插件的图片功能
 全被关掉——不只是聊天发图，连 `read` 图片、Office 渲染、子代理带图都会被拒。
 
-**不要把它改回固定值。** 有 7 项单元测试守着这个语义（含"未知保持未知"）。
+**不要把它改回固定值。** 有 160 项单元测试守着这个语义（含"未知保持未知"）。
 
 ### 3.6 错误策略（目标第 5 项）
 
 **可降级**（换模型可能成功）：
-`EMPTY_RESPONSE, RATE_LIMIT, SERVER, TIMEOUT, TRANSPORT, STREAM_CLOSED, MALFORMED_RESPONSE, QUOTA, CONTEXT_WINDOW_EXCEEDED`
+`EMPTY_RESPONSE, RATE_LIMIT, SERVER, TIMEOUT, TRANSPORT, STREAM_CLOSED, MALFORMED_RESPONSE, QUOTA, CONTEXT_WINDOW_EXCEEDED, INVALID_PREPARED_CALL`
 
 **不可降级**：
 `ABORTED`（用户取消，立即停止）、`AUTH`、`INVALID_REQUEST`、`MODEL_UNSUPPORTED`、
@@ -193,6 +193,15 @@ dsh-model-rotation/
 
 `CONTEXT_WINDOW_EXCEEDED` **是可降级的**：不同 provider 对"超限"的判定标准不同
 （token / 字符 / 是否含 system prompt），一个说超了，另一个未必。
+
+`INVALID_PREPARED_CALL` **也是可降级的**，理由不同：它说的是**句柄坏了**，不是对话
+坏了。宿主把 prepared call 绑定到一次性派发，重复派发或控制字段漂移都会报这个码；
+而链上的下一条路由是用**全新句柄**准备的，所以它完全可能成功。0.2.11 之前这个码没有
+分类，走了"未知码默认终止"的分支，导致第一个模型失败后整条链停下——请求日志里 40 次
+失败有 30 次是它，每次 `tried=1`。
+
+> **不要**把它当成"未知码一律降级"的理由。`AUTH`、`INVALID_REQUEST` 这类错误在每条
+> 路由上都会同样失败，降级只会让用户多看几次同样的错误。未知码默认终止这条边界要守住。
 
 **整条链都因超限失败时，摘要会追加可操作提示。** 此时"换厂商"恰恰是已经发生过的
 动作，所以提示会明确排除它，改为指出该压缩对话或开新会话，并给出估算的请求规模：
@@ -309,7 +318,7 @@ surface 令牌解析出来都是 `#fff`，用它们做底色等于没有高亮�
 
 ## 四、测试证据
 
-### 4.1 单元测试 158/158
+### 4.1 单元测试 160/160
 
 ```powershell
 cd 'D:\Deeseek_HARENSS\创建插件\dsh-model-rotation'

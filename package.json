@@ -1,6 +1,6 @@
 {
   "name": "@local/dsh-model-rotation",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "private": true,
   "description": "Model rotation chains: an ordered list of provider/model routes behind one picker entry, failing over on retryable errors.",
   "license": "MIT",
